@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "flaui2", "flaui2.csproj", "{EB0427D5-4BA1-42C0-BF17-F8AD41E8B2E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB0427D5-4BA1-42C0-BF17-F8AD41E8B2E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB0427D5-4BA1-42C0-BF17-F8AD41E8B2E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB0427D5-4BA1-42C0-BF17-F8AD41E8B2E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB0427D5-4BA1-42C0-BF17-F8AD41E8B2E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F7A897F3-157B-44FD-8633-3E799B5A26BD}
+	EndGlobalSection
+EndGlobal
