@@ -7,65 +7,80 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using flaui2.common;
+using System.Windows.Controls;
+using FlaUI.Core.Definitions;
 
 namespace flaui2
 {
     [TestFixture]
     class LoginTest
     {
-        private Application app;
+        private List<Application> apps = new List<Application>();
         private UIA3Automation automation;
+        // private List<string> ids = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
         [SetUp]
         public void Setup()
         {
-            var appPath = @"D:\src\vs\chat\talk2\bin\Debug\net8.0-windows\talk2.exe";
-            app = Application.Launch(appPath);
             automation = new UIA3Automation();
         }
 
-        [TearDown]
-        public void TearDown()
+        // [TearDown]
+        // public void TearDown()
+        // {
+        //     automation.Dispose();
+        //     apps.ForEach(a => a.Close());
+        // }
+
+        [Test]
+        public void Login()
         {
-            automation.Dispose();
-            app.Close();
+            var ids = new List<string> { "1", "2", "3" };
+            var (apps, wl) = Common.appw(ids, automation);
+            Common.Login(wl, ids);
+
+            Common.Close(apps);
         }
 
         [Test]
-        public void TestLoginButtonExists()
+        public void GotoChat()
         {
-            var mainWindow = app.GetMainWindow(automation);
-            var loginButton = mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("btnLogin"))?.AsButton();
+            var ids = new List<string> { "1", "2" };
+            var (apps, wl) = Common.appw(ids, automation);
+            Common.Login(wl, ids);
+            Common.Sleep(2000);
 
-            NUnit.Framework.Assert.IsNotNull(loginButton, "Login 버튼을 찾을 수 없습니다.");
+            Common.ChatMenuClick(wl);
+            Common.Sleep(5000);
 
-            System.Threading.Thread.Sleep(2000);
+            Common.Close(apps);
         }
 
         [Test]
-        public void TestLoginButtonExists1()
+        public void IntoRoom()
         {
-            var mainWindow = app.GetMainWindow(automation);
-            var loginButton = mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("btnLogin"))?.AsButton();
+            var ids = new List<string> { "1", "2", "3" };
+            var (apps, wl) = Common.appw(ids, automation);
 
-            NUnit.Framework.Assert.IsNotNull(loginButton, "Login 버튼을 찾을 수 없습니다.");
+            Common.Login(wl, ids);
+            Common.ChatMenuClick(wl);
 
-            loginButton.Invoke();  // 버튼 클릭
+            string roomNo = "15";
+            wl.ForEach(w =>
+            {
+                w.Focus();
+                var chats = w.FindFirstDescendant(cf => cf.ByAutomationId("chats"));
+                chats.FindAllDescendants().ToList().ForEach(x => System.Diagnostics.Debug.WriteLine(x.ClassName + "," + x.AutomationId));
+                var item15 = chats.FindFirstDescendant(cf => cf.ByAutomationId(roomNo));
+                item15.DoubleClick();
+            });
 
-            System.Threading.Thread.Sleep(2000);
-        }
+            apps.ForEach(a => a.GetAllTopLevelWindows(automation)
+                               .FirstOrDefault(w => w.Properties.AutomationId.ValueOrDefault == $"RoomNo_{roomNo}")
+                               .Close());
 
-        [Test]
-        public void TestLoginButtonExists2()
-        {
-            var mainWindow = app.GetMainWindow(automation);
-            var loginButton = mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("btnLogin"))?.AsButton();
-
-            NUnit.Framework.Assert.IsNotNull(loginButton, "Login 버튼을 찾을 수 없습니다.");
-
-            loginButton.Invoke();  // 버튼 클릭
-
-            System.Threading.Thread.Sleep(4000);
+            Common.Close(apps);
         }
     }
 }
