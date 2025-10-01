@@ -13,6 +13,7 @@ using FlaUI.Core.Definitions;
 using FlaUI.Core.WindowsAPI;
 using FlaUI.Core.Input;
 using FlaUI.Core.Tools;
+using System.Windows.Interop;
 
 namespace flaui2
 {
@@ -133,6 +134,53 @@ namespace flaui2
         }
 
         [Test]
+        public void 채팅창_나가기_취소()
+        {
+            var ids = new List<string> { "1" };
+            var (apps, wl) = Common.appw(ids, automation);
+
+            Common.Login(wl, ids);
+            Common.ChatMenuClick(wl);
+
+            // 채팅방 켜기
+            string roomNo = "15";
+            wl.ForEach(w =>
+            {
+                w.Focus();
+                var chats = w.FindFirstDescendant(cf => cf.ByAutomationId("chats"));
+                var item15 = chats.FindFirstDescendant(cf => cf.ByAutomationId(roomNo));
+                item15.DoubleClick();
+            });
+
+            List<Window> rooms = new List<Window>();
+            apps.ForEach(a => rooms.Add(a.GetAllTopLevelWindows(automation)
+                               .FirstOrDefault(w => w.Properties.AutomationId.ValueOrDefault == $"RoomNo_{roomNo}")));
+
+            rooms.ForEach(r =>
+            {
+                var btnLeave = r.FindFirstDescendant(cf => cf.ByAutomationId("BtnLeave")).AsButton();
+                btnLeave.Invoke();
+
+                Common.Sleep(1000);
+
+                var messageBox = apps[0].GetAllTopLevelWindows(automation).FirstOrDefault(w => w.Title == "취소");
+                if (messageBox != null)
+                {
+                    // 5. 메시지 텍스트 확인
+                    var textElement = messageBox.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
+                    Assert.AreEqual("정말로 방 나갈테야??", textElement?.AsLabel()?.Text);
+
+                    // 6. 취소 버튼 클릭
+                    var cancleButton = messageBox.FindFirstDescendant(cf => cf.ByAutomationId("1"))?.AsButton();
+                    cancleButton.Invoke();  // "확인" 버튼은 보통 AutomationId "2"
+
+                    // 다른 버튼 예:
+                    // 취소 버튼은 AutomationId "1"
+                }
+            });
+        }
+
+        // [Test]
         public void 채팅창_켜진채로_메인창끄면_알림문자()
         {
             var ids = new List<string> { "1" };
