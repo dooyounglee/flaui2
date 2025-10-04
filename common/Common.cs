@@ -7,14 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace flaui2.common
 {
     class Common
     {
-        private static string appPath = @"D:\src\vs\chat\talk2\bin\Debug\net8.0-windows\talk2.exe";
+        private static string appPath = @"D:\src\vs\wpftalk\bin\Debug\net8.0-windows\talk2.exe";
 
         public static (List<FlaUI.Core.Application>, List<FlaUI.Core.AutomationElements.Window>) appw(List<string> ids, UIA3Automation automation)
         {
@@ -42,6 +40,25 @@ namespace flaui2.common
                 loginButton.Invoke();
             }
             Sleep(1000);
+        }
+
+        public static void MessageBox(Application app, string title, string text, string name, UIA3Automation automation)
+        {
+            var messageBox = app.GetMainWindow(automation).ModalWindows.FirstOrDefault(w => w.Title == title);
+            if (messageBox != null)
+            {
+                // 5. 메시지 텍스트 확인
+                var textElement = messageBox.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
+                Assert.AreEqual(text, textElement?.AsLabel()?.Text);
+
+                var cancleButton = messageBox.FindFirstDescendant(cf => cf.ByName(name))?.AsButton();
+                cancleButton.Invoke();
+            }
+            else
+            {
+                Assert.Fail();
+            }
+            Common.Sleep(1000);
         }
 
         public static void UserMenuClick(FlaUI.Core.AutomationElements.Window mainWindow)
