@@ -62,7 +62,7 @@ namespace flaui2
         }
 
         [Test]
-        public void IntoRoom()
+        public void IntoRoom([Values("15")] string roomNo)
         {
             var ids = new List<string> { "1", "2", "3" };
             var (apps, wl) = Common.appw(ids, automation);
@@ -70,7 +70,6 @@ namespace flaui2
             Common.Login(wl, ids);
             Common.ChatMenuClick(wl);
 
-            string roomNo = "15";
             wl.ForEach(w =>
             {
                 w.Focus();
@@ -88,7 +87,7 @@ namespace flaui2
         }
 
         [Test]
-        public void 채팅치면_다른방에도_전파()
+        public void 채팅치면_다른방에도_전파([Values("15")] string roomNo)
         {
             var ids = new List<string> { "1", "2", "3" };
             var (apps, wl) = Common.appw(ids, automation);
@@ -97,7 +96,6 @@ namespace flaui2
             Common.ChatMenuClick(wl);
 
             // 채팅방 켜기
-            string roomNo = "15";
             wl.ForEach(w =>
             {
                 w.Focus();
@@ -134,7 +132,7 @@ namespace flaui2
         }
 
         [Test]
-        public void 채팅창_나가기_취소()
+        public void 채팅창_나가기_취소([Values("15")] string roomNo)
         {
             var ids = new List<string> { "1" };
             var (apps, wl) = Common.appw(ids, automation);
@@ -143,7 +141,6 @@ namespace flaui2
             Common.ChatMenuClick(wl);
 
             // 채팅방 켜기
-            string roomNo = "15";
             wl.ForEach(w =>
             {
                 w.Focus();
@@ -161,9 +158,9 @@ namespace flaui2
                 var btnLeave = r.FindFirstDescendant(cf => cf.ByAutomationId("BtnLeave")).AsButton();
                 btnLeave.Invoke();
 
-                Common.Sleep(1000);
+                Common.Sleep(500);
 
-                var messageBox = apps[0].GetAllTopLevelWindows(automation).FirstOrDefault(w => w.Title == "취소");
+                var messageBox = apps[0].GetMainWindow(automation).ModalWindows.FirstOrDefault(w => w.Title == "방 나가기");
                 if (messageBox != null)
                 {
                     // 5. 메시지 텍스트 확인
@@ -171,12 +168,69 @@ namespace flaui2
                     Assert.AreEqual("정말로 방 나갈테야??", textElement?.AsLabel()?.Text);
 
                     // 6. 취소 버튼 클릭
-                    var cancleButton = messageBox.FindFirstDescendant(cf => cf.ByAutomationId("1"))?.AsButton();
-                    cancleButton.Invoke();  // "확인" 버튼은 보통 AutomationId "2"
-
-                    // 다른 버튼 예:
-                    // 취소 버튼은 AutomationId "1"
+                    // AutomationElement[] items = messageBox.FindAllDescendants(cf => cf.ByControlType(ControlType.Button));
+                    // foreach (var item in items)
+                    // {
+                    //     System.Diagnostics.Debug.WriteLine($"{item.Automation} {item.AutomationType} {item.AutomationId} {item.Name}");
+                    // }
+                    var cancleButton = messageBox.FindFirstDescendant(cf => cf.ByName("취소"))?.AsButton();
+                    cancleButton.Invoke();
                 }
+                else
+                {
+                    Assert.Fail();
+                }
+
+                Assert.NotNull(apps[0].GetAllTopLevelWindows(automation).FirstOrDefault(cf => cf.AutomationId == $"RoomNo_{roomNo}"));
+            });
+        }
+
+        [Test]
+        public void 채팅창_나가기_확인([Values("15")] string roomNo)
+        {
+            var ids = new List<string> { "1" };
+            var (apps, wl) = Common.appw(ids, automation);
+
+            Common.Login(wl, ids);
+            Common.ChatMenuClick(wl);
+
+            // 채팅방 켜기
+            wl.ForEach(w =>
+            {
+                w.Focus();
+                var chats = w.FindFirstDescendant(cf => cf.ByAutomationId("chats"));
+                var item15 = chats.FindFirstDescendant(cf => cf.ByAutomationId(roomNo));
+                item15.DoubleClick();
+            });
+
+            List<Window> rooms = new List<Window>();
+            apps.ForEach(a => rooms.Add(a.GetAllTopLevelWindows(automation)
+                               .FirstOrDefault(w => w.Properties.AutomationId.ValueOrDefault == $"RoomNo_{roomNo}")));
+
+            rooms.ForEach(r =>
+            {
+                var btnLeave = r.FindFirstDescendant(cf => cf.ByAutomationId("BtnLeave")).AsButton();
+                btnLeave.Invoke();
+
+                Common.Sleep(500);
+
+                var messageBox = apps[0].GetMainWindow(automation).ModalWindows.FirstOrDefault(w => w.Title == "방 나가기");
+                if (messageBox != null)
+                {
+                    // 5. 메시지 텍스트 확인
+                    var textElement = messageBox.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
+                    Assert.AreEqual("정말로 방 나갈테야??", textElement?.AsLabel()?.Text);
+
+                    var cancleButton = messageBox.FindFirstDescendant(cf => cf.ByName("확인"))?.AsButton();
+                    cancleButton.Invoke();
+                }
+                else
+                {
+                    Assert.Fail();
+                }
+                Common.Sleep(1000);
+
+                Assert.IsNull(apps[0].GetAllTopLevelWindows(automation).FirstOrDefault(cf => cf.AutomationId == $"RoomNo_{roomNo}"));
             });
         }
 
