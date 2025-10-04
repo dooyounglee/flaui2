@@ -221,6 +221,48 @@ namespace flaui2
             Assert.IsNull(apps[0].GetAllTopLevelWindows(automation).FirstOrDefault(cf => cf.AutomationId == $"RoomNo_{roomNo}"));
         }
 
+        [Test]
+        public void 채팅창_2명방_만들기()
+        {
+            var ids = new List<string> { "1" };
+            var (apps, wl) = Common.appw(ids, automation);
+
+            Common.Login(wl, ids);
+            Common.ChatMenuClick(wl);
+
+            Chat.ClickCreateRoom(wl);
+
+            apps.ForEach(a =>
+            {
+
+            });
+        }
+
+        [Test]
+        public void 채팅창_3명방_만들기()
+        {
+            var ids = new List<string> { "1" };
+            var (apps, wl) = Common.appw(ids, automation);
+
+            Common.Login(wl, ids);
+            Common.ChatMenuClick(wl);
+
+            Chat.ClickCreateRoom(wl);
+
+            apps.ForEach(a =>
+            {
+                var w_UserPopup = a.GetAllTopLevelWindows(automation).FirstOrDefault(w => w.Properties.AutomationId == "UserPopupView");
+                var users = w_UserPopup.FindFirstDescendant(cf => cf.ByAutomationId("users"));
+                users.FindFirstDescendant(cf => cf.ByAutomationId("2")).Click();
+                Keyboard.Press(VirtualKeyShort.CONTROL);
+                users.FindFirstDescendant(cf => cf.ByAutomationId("3")).Click();
+                users.FindFirstDescendant(cf => cf.ByAutomationId("4")).Click();
+
+                var btnSelect = w_UserPopup.FindFirstDescendant(cf => cf.ByAutomationId("BtnSelect")).AsButton();
+                btnSelect.Invoke();
+            });
+        }
+
         // [Test]
         public void 채팅창_켜진채로_메인창끄면_알림문자()
         {

@@ -61,6 +61,12 @@ namespace flaui2.common
             Common.Sleep(1000);
         }
 
+        public static void ClickBtn(Window w, string automationId)
+        {
+            var btn = w.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
+            btn.Click();
+        }
+
         public static void UserMenuClick(FlaUI.Core.AutomationElements.Window mainWindow)
         {
             var menuUser = mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("menuUser"));
